@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PLATEA – Test Execution Report</title>
+<style>
+  :root{
+    --green-900:#064e2b; --green-700:#0b7a3f; --green-100:#e6f6ec; --green-50:#f3fbf6;
+    --red-700:#b42318; --red-100:#fde8e6;
+    --ink:#1b2b22; --muted:#5b6b62; --line:#d6e4db; --bg:#f7faf8; --card:#fff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+  header{background:linear-gradient(135deg,var(--green-900),var(--green-700));color:#fff;padding:40px 24px}
+  header .wrap{max-width:1000px;margin:auto}
+  header h1{margin:0 0 4px;font-size:2rem;letter-spacing:.08em}
+  header h2{margin:0 0 20px;font-weight:500;font-size:1.1rem;opacity:.9}
+  .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px 24px;font-size:.92rem}
+  .meta b{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;opacity:.75;font-weight:600}
+  main{max-width:1000px;margin:auto;padding:24px}
+  nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+  nav a{font-size:.85rem;padding:6px 12px;border-radius:999px;background:var(--green-100);color:var(--green-900);text-decoration:none;border:1px solid var(--line)}
+  nav a:hover{background:var(--green-700);color:#fff}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:28px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center}
+  .stat .n{font-size:2rem;font-weight:700}
+  .stat .l{font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  .stat.pass .n{color:var(--green-700)} .stat.fail .n{color:var(--red-700)}
+  section.module{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:24px;overflow:hidden}
+  section.module>h3{margin:0;padding:16px 20px;background:var(--green-50);border-bottom:1px solid var(--line);font-size:1.1rem;color:var(--green-900);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  .count{font-size:.8rem;font-weight:500;color:var(--muted)}
+  .pad{padding:16px 20px}
+  .scenario{font-size:.92rem;margin-bottom:14px}
+  .scenario span{color:var(--muted)}
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--green-50);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  td.num,th.num{text-align:right}
+  tr.total td{font-weight:700;background:var(--green-50)}
+  .badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.78rem;font-weight:700}
+  .badge.Pass{background:var(--green-100);color:var(--green-700)}
+  .badge.Fail{background:var(--red-100);color:var(--red-700)}
+  details{border:1px solid var(--line);border-radius:10px;margin-top:10px}
+  details[open]{background:#fcfefd}
+  summary{cursor:pointer;padding:10px 14px;font-weight:600;font-size:.92rem;display:flex;gap:10px;align-items:center;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"▸";color:var(--green-700);transition:transform .15s}
+  details[open]>summary::before{transform:rotate(90deg)}
+  summary .badge{margin-left:auto}
+  .detail{padding:4px 18px 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px 28px;font-size:.88rem}
+  .detail h5{margin:0 0 4px;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  .detail ol,.detail ul{margin:0;padding-left:20px}
+  .detail p{margin:0}
+  .full{grid-column:1/-1}
+  h2.sec{font-size:1.25rem;color:var(--green-900);margin:32px 0 12px}
+  .prose{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 22px;font-size:.93rem}
+  .prose p{margin:0 0 10px}.prose p:last-child{margin:0}
+  footer{text-align:center;color:var(--muted);font-size:.8rem;padding:24px}
+  @media print{details{display:block}details>*{display:block}nav{display:none}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>PLATEA</h1>
+  <h2>Test Execution Report</h2>
+  <div class="meta">
+    <div><b>Project Title</b>PLATEA – Campus Food-Ordering Kiosk Interface</div>
+    <div><b>Testing Type</b>Functional Testing</div>
+    <div><b>Testing Environment</b>Figma Prototype – Present Mode</div>
+    <div><b>Testing Method</b>Positive and Negative Testing</div>
+  </div>
+</div></header>
+
+<main>
+  <nav id="nav"></nav>
+  <div class="stats" id="stats"></div>
+  <div id="modules"></div>
+
+  <h2 class="sec" id="overall">8. Overall Test Execution Summary</h2>
+  <div class="prose" style="padding:0;overflow-x:auto"><table id="overallTable"></table></div>
+
+  <h2 class="sec">9. Test Execution Evaluation</h2>
+  <div class="prose">
+    <p>The test execution covers the seven major modules of the PLATEA campus food-ordering kiosk prototype. A total of 27 test cases are prepared to evaluate the interface navigation, menu category filtering, Add to Cart confirmation, cart review, payment selection, and order confirmation.</p>
+    <p>Both positive and negative test scenarios are included to assess whether the prototype behaves according to its expected functions. The results of each test case will help identify possible interaction issues and areas that require improvement.</p>
+    <p>Any failed test cases should be reviewed by the project team. Necessary corrections should be applied, followed by retesting to verify whether the identified issues have been resolved.</p>
+  </div>
+
+  <h2 class="sec">10. Conclusion</h2>
+  <div class="prose">
+    <p>The Test Execution Report provides a structured assessment of the PLATEA prototype based on its designed interface and intended user interactions. The testing activities focus on verifying the major functions involved in the campus food-ordering process, from accessing the Welcome Page to viewing the final order confirmation.</p>
+    <p>The test results will serve as a reference for evaluating the functionality, navigation, and consistency of the prototype. Identified issues will be used as a basis for improving the design and ensuring a smooth and understandable ordering experience for students.</p>
+  </div>
+</main>
+<footer>PLATEA – Campus Food-Ordering Kiosk Interface · Test Execution Report</footer>
+
+<script>
+/* ---------- helpers to build repeated test cases ---------- */
+const filterCase = (id, cat, noun) => ({
+  id, desc:`Verify the ${cat} category filter.`,
+  sum:`Only ${noun} products were displayed.`, status:"Pass",
+  title:`Verify ${cat} Category Filter`,
+  steps:["Open the Menu Page.",`Click the ${cat} category.`,"Observe the displayed products.",`Verify that the products belong to the ${cat} category.`],
+  pre:["The Menu Page is displayed.",`The ${cat} category filter is accessible.`],
+  data:[`Category: ${cat}`], post:[`Only ${noun} products are displayed.`],
+  expected:`The menu should display only the available ${noun} products.`,
+  actual:`Only ${noun} products were displayed after selecting the ${cat} category.`
+});
+const cartCase = (id, cat, noun) => ({
+  id, desc:`Verify Add to Cart confirmation for ${cat}.`,
+  sum:"The Add to Cart confirmation modal was displayed.", status:"Pass",
+  title:`Verify Add to Cart Confirmation for ${cat}`,
+  steps:["Open the Menu Page.",`Select ${cat}.`,`Choose an available ${noun}.`,"Click Add to Cart.","Observe the confirmation modal."],
+  pre:[`The ${cat} category is displayed.`,`At least one ${noun} product is available.`],
+  data:[`Category: ${cat}`,`Selected Product: One available ${noun}`],
+  post:["The Add to Cart confirmation modal is displayed."],
+  expected:`The prototype should display the confirmation modal after clicking Add to Cart on a ${noun} product.`,
+  actual:"The Add to Cart confirmation modal was successfully displayed."
+});
+const payCase = (id, name) => ({
+  id, desc:`Verify the ${name} payment method.`,
+  sum:`${name} was successfully selected.`, status:"Pass",
+  title:`Verify ${name} Payment Method`,
+  steps:["Open the Balance & Rewards screen.","Locate the payment method section.",`Select ${name}.`,"Observe the selection indicator."],
+  pre:["The Balance & Rewards screen is displayed.",`${name} is available as a payment option.`],
+  data:[`Payment Method: ${name}`], post:[`${name} is indicated as the selected payment method.`],
+  expected:`The ${name} payment option should be selectable and should display its selected state.`,
+  actual:`${name} was successfully selected and its selected state was displayed.`
+});
+
+/* ---------- report data ---------- */
+const modules = [
+ { n:1, name:"Welcome Page", scenario:"Verify the display and navigation functionality of the Welcome Page.", cases:[
+  { id:"TC-001", desc:"Verify the Start Your Order button.", sum:"The button successfully redirected the user to the Login Page.", status:"Pass",
+    title:"Verify Start Your Order Button",
+    steps:["Open the PLATEA prototype in Present Mode.","Locate the Start Your Order button on the Welcome Page.","Click the button.","Observe the displayed screen."],
+    pre:["The PLATEA prototype is accessible.","The Welcome Page is displayed."], data:["Button: Start Your Order"], post:["The Login Page is displayed."],
+    expected:"The prototype should navigate from the Welcome Page to the Login Page after clicking the Start Your Order button.",
+    actual:"The button successfully redirected the user to the Login Page." },
+  { id:"TC-002", desc:"Verify the Start Your Order button when the prototype connection is unavailable.", sum:"The button did not respond, and the Welcome Page remained displayed.", status:"Fail",
+    title:"Verify Unresponsive Start Your Order Button",
+    steps:["Open the Welcome Page.","Locate the Start Your Order button.","Click the button.","Observe whether the prototype navigates to the Login Page."],
+    pre:["The Welcome Page is displayed.","The button's prototype connection is unavailable."], data:["Button: Start Your Order"], post:["The user remains on the Welcome Page."],
+    expected:"The button should navigate the user to the Login Page.",
+    actual:"The button did not respond when clicked, and the Welcome Page remained displayed." }
+ ]},
+ { n:2, name:"Login Page", scenario:"Verify the Student ID input field and the navigation functionality of the Login Page.", cases:[
+  { id:"TC-001", desc:"Verify the Student ID input field.", sum:"The input field successfully displayed the entered Student ID.", status:"Pass",
+    title:"Verify Student ID Input Field",
+    steps:["Navigate to the Login Page.","Locate the Student ID input field.","Click the input field.","Enter a sample Student ID.","Observe the entered value."],
+    pre:["The Login Page is displayed.","The Student ID input field is visible."], data:["Student ID: 2026-0001"], post:["The entered Student ID remains displayed in the input field."],
+    expected:"The Student ID input field should accept and display the entered identification number.",
+    actual:"The input field successfully accepted and displayed the entered Student ID." },
+  { id:"TC-002", desc:"Verify the Continue to Menu button.", sum:"The button successfully redirected the user to the Menu Page.", status:"Pass",
+    title:"Verify Continue to Menu Button",
+    steps:["Open the Login Page.","Enter a sample Student ID.","Locate the Continue to Menu button.","Click the button.","Observe the displayed screen."],
+    pre:["The Login Page is displayed.","A sample Student ID has been entered."], data:["Student ID: 2026-0001","Button: Continue to Menu"], post:["The Menu Page is displayed."],
+    expected:"The prototype should navigate to the Menu Page after clicking Continue to Menu.",
+    actual:"The button successfully redirected the user to the Menu Page." },
+  { id:"TC-003", desc:"Verify the Continue to Menu button when its prototype connection is unavailable.", sum:"The button did not respond, and the Login Page remained displayed.", status:"Fail",
+    title:"Verify Unresponsive Continue to Menu Button",
+    steps:["Open the Login Page.","Enter a sample Student ID.","Click the Continue to Menu button.","Observe whether the prototype navigates to the Menu Page."],
+    pre:["The Login Page is displayed.","The Continue to Menu button has no working prototype connection."], data:["Student ID: 2026-0001","Button: Continue to Menu"], post:["The user remains on the Login Page."],
+    expected:"The button should navigate the user to the Menu Page.",
+    actual:"The button did not respond when clicked, and the Login Page remained displayed." }
+ ]},
+ { n:3, name:"Menu", scenario:"Verify the display of menu items and the functionality of the five food and beverage category filters.", cases:[
+  { id:"TC-001", desc:"Verify the All Items category.", sum:"All available food and beverage items were displayed.", status:"Pass",
+    title:"Verify All Items Category",
+    steps:["Navigate to the Menu Page.","Select All Items.","Observe the displayed menu products.","Check the product images, names, and prices."],
+    pre:["The Menu Page is displayed.","The All Items category is available."], data:["Category: All Items"], post:["All available menu products are displayed."],
+    expected:"The menu should display all available food and beverage products with their corresponding images, names, and prices.",
+    actual:"All available food and beverage items were displayed with their corresponding details." },
+  filterCase("TC-002","Meals","meal"),
+  filterCase("TC-003","Snacks","snack"),
+  filterCase("TC-004","Desserts","dessert"),
+  filterCase("TC-005","Drinks","beverage"),
+  { id:"TC-006", desc:"Verify the search field.", sum:"The search field did not produce the expected matching results.", status:"Fail",
+    title:"Verify Search Field",
+    steps:["Open the Menu Page.","Locate the search field.","Enter the name of an available food item.","Observe the displayed results.","Check whether the matching product appears."],
+    pre:["The Menu Page is displayed.","The search field is accessible.","At least one matching menu item is available."], data:["Search Keyword: Chicken"], post:["The matching search results should be displayed."],
+    expected:"The menu should display the product or products that match the entered search keyword.",
+    actual:"The search field did not display the expected matching products." }
+ ]},
+ { n:4, name:"Add to Cart Confirmation", scenario:"Verify the Add to Cart interaction and confirmation modal displayed after selecting food and beverage products from the different menu categories.", cases:[
+  { id:"TC-001", desc:"Verify Add to Cart confirmation for All Items.", sum:"The Add to Cart confirmation modal was displayed.", status:"Pass",
+    title:"Verify Add to Cart Confirmation for All Items",
+    steps:["Open the Menu Page.","Select All Items.","Choose an available food product.","Click Add to Cart.","Observe the confirmation modal."],
+    pre:["The Menu Page is displayed.","The All Items category is selected.","At least one product is available."],
+    data:["Category: All Items","Selected Product: One available menu item","Action: Add to Cart"], post:["The Add to Cart confirmation modal is displayed."],
+    expected:"The prototype should display the Add to Cart confirmation modal after the selected product is added.",
+    actual:"The Add to Cart confirmation modal was successfully displayed." },
+  cartCase("TC-002","Meals","meal"),
+  cartCase("TC-003","Snacks","snack"),
+  cartCase("TC-004","Desserts","dessert"),
+  cartCase("TC-005","Drinks","beverage"),
+  { id:"TC-006", desc:"Verify Add to Cart when the confirmation interaction is unavailable.", sum:"The confirmation modal did not appear after clicking Add to Cart.", status:"Fail",
+    title:"Verify Add to Cart Without Confirmation Modal",
+    steps:["Open the Menu Page.","Select an available product.","Click Add to Cart.","Observe whether the confirmation modal appears."],
+    pre:["The Menu Page is displayed.","The selected product is available.","The confirmation interaction is unavailable for the negative test."],
+    data:["Selected Product: One available menu item","Action: Add to Cart"], post:["No confirmation modal is displayed."],
+    expected:"The prototype should display the Add to Cart confirmation modal after the user selects a product.",
+    actual:"The confirmation modal did not appear after clicking Add to Cart." }
+ ]},
+ { n:5, name:"View the Cart", scenario:"Verify the display of selected products and the order summary on the View the Cart screen.", cases:[
+  { id:"TC-001", desc:"Verify the selected items displayed in the cart.", sum:"The selected products and their details were displayed correctly.", status:"Pass",
+    title:"Verify Selected Items in the Cart",
+    steps:["Add available food or beverage products to the cart.","Navigate to the View the Cart screen.","Observe the selected products.","Check their corresponding images and item details.","Verify that the selected products appear in the cart."],
+    pre:["The Menu Page is accessible.","At least one product has been added to the cart.","The View the Cart screen is accessible."],
+    data:["Selected Products: Two available menu items.","Quantity: Based on the selected items."], post:["The selected products remain displayed in the cart."],
+    expected:"The View the Cart screen should display the selected products with their corresponding images, names, quantities, and prices.",
+    actual:"The selected products and their corresponding details were displayed correctly on the View the Cart screen." },
+  { id:"TC-002", desc:"Verify the accuracy of the order summary.", sum:"The displayed order total did not match the expected computed amount.", status:"Fail",
+    title:"Verify Order Summary Accuracy",
+    steps:["Add available products to the cart.","Navigate to the View the Cart screen.","Review the individual item prices.","Check the displayed order summary.","Calculate the expected total.","Compare the calculated amount with the displayed total."],
+    pre:["At least one product has been added to the cart.","The View the Cart screen is displayed.","The incorrect total is configured for this negative test."],
+    data:["Product A: ₱100.00","Product B: ₱50.00","Expected Subtotal: ₱150.00","Sample Incorrect Total: ₱160.00"], post:["The incorrect order summary is identified and documented."],
+    expected:"The displayed order summary should reflect the correct prices and total of the selected products.",
+    actual:"The cart displayed an incorrect total of ₱160.00 instead of the expected ₱150.00." }
+ ]},
+ { n:6, name:"Balance & Rewards", scenario:"Verify the display of the available balance and the selection of payment methods on the Balance & Rewards screen.", cases:[
+  { id:"TC-001", desc:"Verify the available balance display.", sum:"The available balance was displayed correctly.", status:"Pass",
+    title:"Verify Available Balance Display",
+    steps:["Navigate to the Balance & Rewards screen.","Locate the available balance section.","Observe the displayed balance.","Verify that the amount is properly presented."],
+    pre:["The Balance & Rewards screen is accessible."], data:["Available Balance: Example balance displayed in the prototype."], post:["The available balance remains displayed."],
+    expected:"The Balance & Rewards screen should display the available balance clearly.",
+    actual:"The available balance was displayed correctly on the screen." },
+  payCase("TC-002","Cash"),
+  payCase("TC-003","GCash"),
+  payCase("TC-004","PayMaya"),
+  { id:"TC-005", desc:"Verify payment method selection when the option is unresponsive.", sum:"The selected payment option did not respond to user interaction.", status:"Fail",
+    title:"Verify Unresponsive Payment Method Selection",
+    steps:["Open the Balance & Rewards screen.","Locate the available payment methods.","Click one payment option.","Observe whether the selected state changes."],
+    pre:["The Balance & Rewards screen is displayed.","The selected payment option has no working prototype interaction for the negative test."],
+    data:["Payment Method: GCash"], post:["The payment option remains unselected."],
+    expected:"The selected payment option should respond to the user's interaction and display the appropriate selection state.",
+    actual:"The GCash payment option did not respond when clicked, and its selection state remained unchanged." }
+ ]},
+ { n:7, name:"Order Success", scenario:"Verify the order confirmation message, order details, and navigation functionality of the Order Success screen.", cases:[
+  { id:"TC-001", desc:"Verify the order confirmation message.", sum:"The Order Successfully Placed message was displayed.", status:"Pass",
+    title:"Verify Order Confirmation Message",
+    steps:["Complete the intended ordering flow.","Navigate to the Order Success screen.","Observe the confirmation message.","Verify that the confirmation message is displayed."],
+    pre:["The user has reached the Order Success screen.","The order confirmation screen is accessible."], data:["Confirmation Message: Order Successfully Placed"], post:["The order confirmation message remains displayed."],
+    expected:"The Order Success screen should display the Order Successfully Placed confirmation message.",
+    actual:"The Order Successfully Placed message was displayed successfully." },
+  { id:"TC-002", desc:"Verify the displayed order details and status.", sum:"The order number, total, payment method, and order status were displayed correctly.", status:"Pass",
+    title:"Verify Order Details and Status",
+    steps:["Open the Order Success screen.","Locate the order details section.","Check the displayed order number.","Verify the order total.","Check the selected payment method.","Verify the displayed order status."],
+    pre:["The Order Success screen is displayed.","Sample order information is available."],
+    data:["Order Number: Example order number displayed in the prototype.","Order Total: Based on the sample order.","Payment Method: Cash.","Order Status: Confirmed."], post:["The order confirmation details remain displayed."],
+    expected:"The Order Success screen should display the correct order number, order total, selected payment method, and Confirmed status.",
+    actual:"The order number, order total, selected payment method, and Confirmed status were displayed correctly." },
+  { id:"TC-003", desc:"Verify the Back to Menu button when its prototype connection is unavailable.", sum:"The button did not respond, and the Order Success screen remained displayed.", status:"Fail",
+    title:"Verify Back to Menu Button",
+    steps:["Open the Order Success screen.","Locate the Back to Menu button.","Click the button.","Observe the displayed screen."],
+    pre:["The Order Success screen is displayed.","The Back to Menu button has no working prototype connection for the negative test."], data:["Button: Back to Menu"], post:["The user remains on the Order Success screen."],
+    expected:"The prototype should redirect the user to the Menu Page after clicking Back to Menu.",
+    actual:"The button did not respond when clicked, and the Order Success screen remained displayed." }
+ ]}
+];
+
+/* ---------- rendering ---------- */
+const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const list = (tag, items) => `<${tag}>${items.map(i=>`<li>${esc(i)}</li>`).join("")}</${tag}>`;
+const badge = s => `<span class="badge ${s}">${s}</span>`;
+
+const totals = modules.map(m => {
+  const passed = m.cases.filter(c=>c.status==="Pass").length;
+  return { m, total:m.cases.length, passed, failed:m.cases.length-passed };
+});
+const T = totals.reduce((a,t)=>({total:a.total+t.total,passed:a.passed+t.passed,failed:a.failed+t.failed}),{total:0,passed:0,failed:0});
+
+document.getElementById("nav").innerHTML =
+  modules.map(m=>`<a href="#m${m.n}">${m.n}. ${m.name}</a>`).join("") + `<a href="#overall">Overall Summary</a>`;
+
+document.getElementById("stats").innerHTML = `
+  <div class="stat"><div class="n">${T.total}</div><div class="l">Test Cases</div></div>
+  <div class="stat pass"><div class="n">${T.passed}</div><div class="l">Passed</div></div>
+  <div class="stat fail"><div class="n">${T.failed}</div><div class="l">Failed</div></div>
+  <div class="stat"><div class="n">${Math.round(T.passed/T.total*100)}%</div><div class="l">Pass Rate</div></div>`;
+
+document.getElementById("modules").innerHTML = modules.map(m => `
+<section class="module" id="m${m.n}">
+  <h3>MODULE ${m.n}: ${m.name.toUpperCase()} <span class="count">${m.cases.length} test cases</span></h3>
+  <div class="pad">
+    <h4 style="margin:0 0 6px">${m.n}.1 Test Execution Summary</h4>
+    <p class="scenario"><b>Test Scenario ID:</b> TS-001<br><b>Test Scenario Description:</b> <span>${esc(m.scenario)}</span></p>
+    <div style="overflow-x:auto"><table>
+      <tr><th>Test Case ID</th><th>Test Case Description</th><th>Actual Result</th><th>Status</th></tr>
+      ${m.cases.map(c=>`<tr><td>${c.id}</td><td>${esc(c.desc)}</td><td>${esc(c.sum)}</td><td>${badge(c.status)}</td></tr>`).join("")}
+    </table></div>
+    <h4 style="margin:20px 0 0">${m.n}.2 Detailed Test Cases</h4>
+    ${m.cases.map(c=>`
+    <details>
+      <summary>${c.id} – ${esc(c.title)} ${badge(c.status)}</summary>
+      <div class="detail">
+        <div><h5>Test Steps</h5>${list("ol",c.steps)}</div>
+        <div><h5>Pre-conditions</h5>${list("ul",c.pre)}</div>
+        <div><h5>Test Data</h5>${list("ul",c.data)}</div>
+        <div><h5>Post-conditions</h5>${list("ul",c.post)}</div>
+        <div class="full"><h5>Expected Result</h5><p>${esc(c.expected)}</p></div>
+        <div class="full"><h5>Actual Result</h5><p>${esc(c.actual)}</p></div>
+        <div class="full"><h5>Status</h5>${badge(c.status)}</div>
+      </div>
+    </details>`).join("")}
+  </div>
+</section>`).join("");
+
+document.getElementById("overallTable").innerHTML = `
+  <tr><th>Module</th><th>Test Scenario ID</th><th class="num">Total Test Cases</th><th class="num">Passed</th><th class="num">Failed</th></tr>
+  ${totals.map(t=>`<tr><td>${t.m.name}</td><td>TS-001</td><td class="num">${t.total}</td><td class="num">${t.passed}</td><td class="num">${t.failed}</td></tr>`).join("")}
+  <tr class="total"><td>TOTAL</td><td></td><td class="num">${T.total}</td><td class="num">${T.passed}</td><td class="num">${T.failed}</td></tr>`;
+</script>
+</body>
+</html>

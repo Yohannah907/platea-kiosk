@@ -1,0 +1,6 @@
+{
+  "name": "Platea",
+  "description": "Platea – Campus Food-Ordering Kiosk Interface",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

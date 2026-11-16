@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Platea – Campus Food-Ordering Kiosk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;500;700&family=Kaushan+Script&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --text:#0b5a14;          /* headings / body green */
+    --btn:#04502a;           /* dark green buttons */
+    --btn-light:#b8f8b8;     /* "Add to Cart" fill */
+    --line:#7edc86;          /* light green outlines */
+    --mint:#bdf2c8;          /* welcome background */
+    --panel:#effff1;         /* summary panels */
+    --chip:#cde8cf;          /* check circle / confirmed pill */
+    --grey:#eeeeee;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Alegreya Sans","Segoe UI",sans-serif;font-variant-numeric:oldstyle-nums;color:var(--text);background:#a78bfa;min-height:100vh;font-size:20px}
+  button{font-family:inherit;cursor:pointer}
+
+  /* --- prototype helper bar (jump between frames) --- */
+  .switcher{position:sticky;top:0;z-index:100;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;padding:10px;background:rgba(40,20,90,.88);backdrop-filter:blur(6px)}
+  .switcher button{border:0;padding:6px 12px;border-radius:999px;font-size:13px;background:#ffffff33;color:#fff}
+  .switcher button.on{background:#fff;color:#3b1d8a;font-weight:700}
+  .stage{max-width:1280px;margin:24px auto;padding:0 12px}
+  .screen{display:none;background:#fff;position:relative;overflow:hidden;min-height:830px;box-shadow:0 20px 50px #0005}
+  .screen.on{display:block}
+
+  /* grey grainy background used on the menu frames */
+  .grain{background-color:var(--grey);background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .12 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+
+  .logo{font-family:"Kaushan Script",cursive;color:var(--text);font-size:46px;line-height:1;position:relative;display:inline-block}
+  .logo::after{content:"`";position:absolute;right:-12px;top:-4px;font-size:34px}
+
+  /* ---------- WELCOME ---------- */
+  #welcome{background-color:var(--mint)}
+  .welcome{display:grid;grid-template-columns:1fr 1fr;gap:96px;padding:68px 96px;min-height:832px;align-items:stretch}
+  .welcome .left{display:flex;flex-direction:column;justify-content:space-between}
+  .welcome .eyebrow{letter-spacing:.2px;text-transform:uppercase;font-size:24px;margin-bottom:12px}
+  .welcome h1{font-weight:500;font-size:46px;line-height:1.2;margin-bottom:56px}
+  .welcome p{font-size:26px;line-height:1.25;max-width:430px;margin-bottom:56px}
+  .welcome .photo{border-radius:12px;overflow:hidden;background:#273045;display:grid;place-items:center;font-size:160px;min-height:500px}
+  .welcome .photo img{width:100%;height:100%;object-fit:cover;display:block}
+  .cta{display:inline-flex;align-items:center;justify-content:center;gap:12px;background:#073d09;color:var(--btn-light);border:0;border-radius:14px;width:415px;max-width:100%;height:56px;font-size:26px;text-transform:uppercase;transition:.15s}
+  .cta:hover{background:#0b5a14}
+
+  /* ---------- LOGIN ---------- */
+  #login{background-color:var(--mint)}
+  #login.on{display:grid;place-items:center}
+  .login-card{background:#fff;border-radius:24px;padding:44px 48px;width:min(480px,92%);text-align:center}
+  .login-card h2{font-weight:500;font-size:34px;margin:20px 0 6px}
+  .login-card p{font-size:22px;margin-bottom:24px}
+  .login-card label{display:block;text-align:left;font-size:20px;margin-bottom:6px}
+  .login-card input{width:100%;height:50px;border-radius:999px;border:1.5px solid var(--line);padding:0 20px;font:inherit;font-size:22px;color:var(--text);background:var(--panel);margin-bottom:22px}
+  .login-card input:focus{outline:2px solid var(--btn)}
+  .pill-btn{display:block;width:100%;height:56px;border:0;border-radius:999px;background:var(--btn);color:#fff;font-size:26px;font-weight:700;transition:.15s}
+  .pill-btn:hover{background:#0b6b38}
+  .pill-btn:disabled{opacity:.45;cursor:not-allowed}
+
+  /* ---------- MENU ---------- */
+  .topbar{display:flex;align-items:center;height:106px;padding:0 48px;background:#fff;gap:64px}
+  .search{width:514px;max-width:45%;height:38px;background:#ece8f3;border-radius:999px;display:flex;align-items:center;padding:0 16px 0 56px}
+  .search input{flex:1;border:0;background:transparent;font:inherit;font-size:17px;color:#333;outline:none;font-family:Roboto,"Segoe UI",sans-serif;font-variant-numeric:normal}
+  .search input::placeholder{color:#444}
+  .search{padding:0 12px 0 56px;gap:8px}
+  .search-go,.search-clear{background:none;border:0;display:grid;place-items:center;padding:4px;color:#555}
+  .search-clear{display:none;font-size:15px}
+  .search.has-text .search-clear{display:grid}
+  .search-go:hover svg path{fill:var(--btn)}
+  .search:focus-within{box-shadow:0 0 0 2px var(--btn)}
+  .result-note{font-size:22px;margin:-8px 0 18px}
+  .top-right{margin-left:auto;display:flex;align-items:center;gap:22px}
+  .link-btn{display:flex;align-items:center;gap:14px;background:none;border:0;color:var(--text);font-size:26px}
+  .cart-btn{position:relative;background:none;border:0;display:grid;place-items:center}
+  .cart-btn b{position:absolute;top:-8px;right:-8px;background:var(--btn);color:#fff;font-size:13px;min-width:20px;height:20px;border-radius:999px;display:grid;place-items:center;padding:0 5px;font-variant-numeric:normal}
+  .menu-body{padding:32px 42px 130px;position:relative;min-height:1710px}
+  .menu-body h2{font-weight:500;font-size:36px;line-height:1.2}
+  .menu-body .sub{font-size:26px;margin-top:10px}
+  .tabs{display:flex;gap:28px;margin:46px 0 62px 33px;flex-wrap:wrap}
+  .tab{width:158px;height:37px;border:1.5px solid var(--btn);background:transparent;border-radius:14px;font-size:26px;color:var(--text);line-height:1;transition:.15s}
+  .tab:hover{background:#ffffff88}
+  .tab.on{background:var(--btn);color:#fff}
+  .menu-body h3{font-weight:500;font-size:30px;margin-bottom:22px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);row-gap:75px;margin:0 -12px}
+  .card{width:292px;height:350px;border:1px solid var(--line);border-radius:22px;padding:21px 28px;margin:0 auto;text-align:center;background:transparent;transition:.15s}
+  .card:hover{box-shadow:0 10px 24px #0b5a1424;transform:translateY(-3px)}
+  .imgbox{width:236px;height:198px;border-radius:8px;overflow:hidden;background:#fff;border:1px solid #dcdcdc;display:grid;place-items:center;font-size:72px}
+  .imgbox img{width:100%;height:100%;object-fit:cover;display:block}
+  .imgbox img.contain{object-fit:contain}
+  .card .name{font-size:26px;margin-top:6px;line-height:1.1}
+  .card .price{font-size:26px;line-height:1.15}
+  .add{display:block;width:100%;height:36px;margin-top:12px;border-radius:999px;border:1px solid var(--text);background:var(--btn-light);color:var(--text);font-size:26px;line-height:1;transition:.15s}
+  .add:hover{background:#9bf09b}
+  .empty{grid-column:1/-1;text-align:center;font-size:26px;padding:40px}
+  .view-cart{position:absolute;right:54px;bottom:26px;width:195px;height:56px;border:0;border-radius:12px;background:var(--btn);color:#fff;font-size:26px;display:flex;align-items:center;justify-content:center;gap:12px}
+  .view-cart:hover{background:#0b6b38}
+  /* Added-to-cart modal */
+  .overlay{position:absolute;inset:0;background:rgba(10,40,20,.45);display:none;z-index:30}
+  .overlay.on{display:block}
+  .modal{position:sticky;top:260px;margin:260px auto 0;width:min(430px,88%);background:#fff;border-radius:6px;text-align:center;padding:30px 24px 28px;animation:pop .18s ease}
+  .modal h4{font-weight:500;font-size:30px;margin-bottom:6px}
+  .modal p{font-size:21px;margin-bottom:18px}
+  .modal .add{display:inline-block;width:auto;padding:0 28px;height:38px;margin:0}
+  @keyframes pop{from{transform:scale(.94);opacity:0}to{transform:none;opacity:1}}
+
+  /* ---------- Sub pages (cart / balance / success) ---------- */
+  .subpage{padding:30px 42px 40px;min-height:830px}
+  .subpage header{border-bottom:1px solid #777;width:min(1041px,100%);padding-bottom:18px;margin-bottom:12px}
+  .subpage h1{font-weight:500;font-size:36px;line-height:1.3}
+  .subpage .lead{font-size:26px;margin:28px 0 22px}
+  .panel{background:var(--panel);border-radius:26px;padding:14px 16px}
+  .panel h2{font-weight:500;font-size:34px}
+
+  /* cart */
+  .cart-cols{display:grid;grid-template-columns:1fr 565px;gap:50px;align-items:start;max-width:1165px}
+  .cart-cols .lead{margin-top:40px}
+  .line{display:flex;align-items:center;border:1px solid var(--btn);border-radius:28px;padding:18px 20px 18px 34px;gap:16px;margin:0 15px 66px}
+  .line .thumb{width:167px;height:140px;border-radius:12px;overflow:hidden;display:grid;place-items:center;background:#fff;font-size:56px;flex:none}
+  .line .thumb img{width:100%;height:100%;object-fit:cover}
+  .line .info{flex:1}
+  .line .info .n{font-size:36px;line-height:1.1;text-align:center}
+  .line .info .q{font-size:26px;display:flex;align-items:center;gap:10px;margin-top:6px}
+  .line .info .q button{width:26px;height:26px;border-radius:50%;border:1px solid var(--btn);background:#fff;color:var(--text);font-size:18px;line-height:1;display:grid;place-items:center}
+  .line .info .p{font-size:26px;margin:8px 0 0 6px}
+  .sumrow{display:flex;justify-content:space-between;font-size:28px;padding:0 24px 0 0}
+  .summary{padding:14px 16px 40px;margin-top:0}
+  .summary .rows{margin-top:32px;display:grid;gap:22px}
+  .summary hr{border:0;border-top:1px solid #333;margin:22px 22px 18px 2px}
+  .summary .tot{font-size:38px;display:flex;justify-content:space-between;align-items:center;padding-right:22px}
+  .summary .tot span:last-child{font-size:28px}
+  .summary .pm{font-size:28px;margin:10px 0 24px}
+  .select{display:block;width:calc(100% - 30px);margin:0 auto 28px;height:58px;border-radius:999px;border:1px solid #c5f7c8;background:#fff;padding:0 26px;font:inherit;font-size:28px;color:var(--text)}
+  .confirm{display:block;margin:0 auto;width:400px;max-width:90%;height:56px;border:0;border-radius:999px;background:var(--btn);color:#fff;font-size:30px;text-transform:uppercase;font-weight:500}
+  .confirm:hover{background:#0b6b38}
+  .confirm:disabled{opacity:.45;cursor:not-allowed}
+  .empty-cart{font-size:28px;margin:20px 15px}
+  .empty-cart button{border:0;background:none;color:var(--text);text-decoration:underline;font-size:28px}
+
+  /* balance */
+  .balance-wrap{max-width:1165px}
+  .balance-card{background:var(--panel);border-radius:26px;padding:6px 16px 22px;margin-bottom:26px}
+  .balance-card .t{font-size:36px;line-height:1.3}
+  .balance-card .amt{font-size:42px;margin-top:10px}
+  .balance-wrap h3{font-weight:500;font-size:38px;margin-bottom:12px}
+  .pay{display:flex;align-items:center;gap:16px;height:58px;border-radius:999px;border:1px solid var(--line);background:transparent;padding:0 16px;margin-bottom:26px;font-size:28px;width:100%;color:var(--text);text-align:left;transition:.15s}
+  .pay:hover{background:#f4fff5}
+  .pay.on{background:#86e08c;border-color:#2fb344}
+  .back{display:block;width:100%;height:55px;border:0;border-radius:999px;background:var(--btn);color:#fff;font-size:28px;font-weight:700;margin-top:34px}
+  .back:hover{background:#0b6b38}
+  .tagline{text-align:center;font-size:20px;margin-top:6px}
+
+  /* success */
+  .success-body{max-width:1165px;text-align:center}
+  .check{width:130px;height:120px;border-radius:50%;background:var(--chip);margin:20px auto 0;display:grid;place-items:center}
+  .success-body h1{font-size:56px;font-weight:500;margin-top:4px}
+  .success-body .thanks{font-size:26px;max-width:440px;margin:12px auto 36px;line-height:1.1}
+  .order-sum{text-align:left;background:var(--panel);border-radius:26px;padding:14px 34px 4px;margin:0 32px;position:relative}
+  .order-sum h2{font-weight:500;font-size:38px;margin-bottom:20px}
+  .order-sum .r{display:flex;justify-content:space-between;align-items:center;font-size:26px;margin-bottom:22px;padding-right:26px}
+  .order-sum .r.status{font-size:38px;margin-bottom:12px}
+  .pill{background:var(--chip);color:#2a9a2a;border-radius:999px;padding:6px 38px;font-size:26px}
+  .order-sum .back{margin:0 -22px 0;width:calc(100% + 44px);border-radius:999px;height:55px;margin-top:0}
+  .order-sum{padding-bottom:6px}
+
+  @media(max-width:900px){
+    .welcome{grid-template-columns:1fr;padding:36px 24px;gap:32px}
+    .welcome h1{font-size:36px;margin-bottom:24px}.welcome p{margin-bottom:24px}
+    .topbar{padding:0 18px;gap:16px;height:auto;min-height:80px;flex-wrap:wrap;padding-block:12px}
+    .search{max-width:100%;flex:1 1 100%;order:3}
+    .grid{grid-template-columns:1fr;row-gap:28px}.menu-body{min-height:0;padding-inline:18px}
+    .tabs{margin-left:0;gap:10px}.tab{width:auto;padding:0 18px;height:40px}
+    .cart-cols{grid-template-columns:1fr}.line{margin:0 0 20px;flex-wrap:wrap}
+    .subpage{padding:24px 18px}.order-sum{margin:0}
+  }
+</style>
+</head>
+<body>
+
+<div class="switcher" id="switcher"></div>
+
+<div class="stage">
+
+  <!-- WELCOME -->
+  <section class="screen on" id="welcome">
+    <div class="welcome">
+      <div class="left">
+        <div><span class="logo">Platea</span></div>
+        <div>
+          <div class="eyebrow">Campus dining reimagined</div>
+          <h1>Your campus, served<br>beautifully.</h1>
+          <p>Discover your favorite meals and make every campus break delicious.</p>
+          <button class="cta" id="startBtn">Start your order <span>⟶</span></button>
+        </div>
+        <div></div>
+      </div>
+      <div class="photo"><img src="images/welcome.jpg" alt="Shrimp fried rice with egg" onerror="this.remove();this.parentNode.textContent='🍳'"></div>
+    </div>
+  </section>
+
+  <!-- LOGIN -->
+  <section class="screen" id="login">
+    <div class="login-card">
+      <span class="logo">Platea</span>
+      <h2>Welcome to Platea</h2>
+      <p>Enter your Student ID to start ordering.</p>
+      <label for="sid">Student ID</label>
+      <input id="sid" placeholder="e.g. 2026-0001" autocomplete="off">
+      <button class="pill-btn" id="continueBtn">Continue to Menu</button>
+    </div>
+  </section>
+
+  <!-- MENU (All Items / Meals / Snacks / Desserts / Drinks) -->
+  <section class="screen grain" id="menu">
+    <div class="topbar" style="background:#fff">
+      <span class="logo">Platea</span>
+      <div class="search" role="search">
+        <input id="searchInput" type="text" placeholder="Search your favorite food" autocomplete="off">
+        <button type="button" class="search-clear" id="searchClear" title="Clear search" aria-label="Clear search">✕</button>
+        <button type="button" class="search-go" id="searchGo" title="Search" aria-label="Search">
+          <svg width="22" height="22" viewBox="0 0 24 24"><path fill="#444" d="M15.5 14h-.8l-.3-.3A6.5 6.5 0 1 0 14 15.5l.3.3v.8l5 5 1.5-1.5-5-5zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z"/></svg>
+        </button>
+      </div>
+      <div class="top-right">
+        <button class="link-btn" id="toBalance">
+          <svg width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#fff" stroke="#b9a7d6" stroke-width="1.5"/><rect x="12" y="15" width="24" height="18" rx="3" fill="none" stroke="#6b4ea0" stroke-width="2"/><path d="M12 19h24" stroke="#6b4ea0" stroke-width="2"/><rect x="28" y="23" width="8" height="5" rx="1" fill="none" stroke="#6b4ea0" stroke-width="2"/></svg>
+          Balance &amp; Rewards
+        </button>
+        <button class="cart-btn" id="toCart" title="View cart">
+          <svg width="40" height="40" viewBox="0 0 24 24"><path fill="#12b76a" d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM1 2v2h2l3.6 7.6-1.4 2.4A2 2 0 0 0 7 17h12v-2H7.4l1.1-2h7.5a2 2 0 0 0 1.7-1l3.6-6.5A1 1 0 0 0 20.4 4H5.2l-.9-2H1z"/><rect x="9" y="6" width="1.6" height="4" fill="#fff"/><rect x="12" y="5" width="1.6" height="5" fill="#fff"/><rect x="15" y="7" width="1.6" height="3" fill="#fff"/></svg>
+          <b id="cartCount">0</b>
+        </button>
+      </div>
+    </div>
+    <div class="menu-body">
+      <h2>What are your cravings today?</h2>
+      <p class="sub">Fresh choices for your campus day.</p>
+      <div class="tabs" id="tabs"></div>
+      <h3 id="sectionTitle">Our Menu</h3>
+      <div class="grid" id="menuGrid"></div>
+      <button class="view-cart" id="floatCart">View Cart <span>⟶</span></button>
+    </div>
+
+    <!-- Added to Cart confirmation -->
+    <div class="overlay" id="addedModal">
+      <div class="modal">
+        <h4>Added to Cart!</h4>
+        <p id="addedText">Your item has been added to your cart.</p>
+        <button class="add" id="continueShopping">Continue Shopping</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIEW THE CART -->
+  <section class="screen" id="cart">
+    <div class="subpage">
+      <header><span class="logo">Platea</span></header>
+      <h1>Review your Order</h1>
+      <div class="cart-cols">
+        <div>
+          <p class="lead">Check your items before placing your order</p>
+          <div id="cartLines"></div>
+        </div>
+        <div class="panel summary">
+          <h2>Order Summary</h2>
+          <div class="rows">
+            <div class="sumrow"><span>Subtotal</span><span id="subtotal">0.00</span></div>
+            <div class="sumrow"><span>Additional Fees</span><span id="fees">00.00</span></div>
+          </div>
+          <hr>
+          <div class="tot"><span>Total</span><span id="total">0.00</span></div>
+          <div class="pm">Payment Method</div>
+          <select class="select" id="cartPay"></select>
+          <button class="confirm" id="confirmBtn">Confirm Order</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BALANCE & REWARDS -->
+  <section class="screen" id="balance">
+    <div class="subpage">
+      <header><span class="logo">Platea</span></header>
+      <div class="balance-wrap">
+        <h1>Balance &amp; Rewards</h1>
+        <p class="lead">Manage your balance and choose your preferred payment method.</p>
+        <div class="balance-card">
+          <div class="t">Available Balance</div>
+          <div class="amt">₱ 890.00</div>
+        </div>
+        <h3>Choose Payment Method</h3>
+        <div id="payOptions"></div>
+        <button class="back" id="balBack">Back to Menu</button>
+        <p class="tagline">Your campus served beautifully.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ORDER SUCCESS -->
+  <section class="screen" id="success">
+    <div class="subpage">
+      <header><span class="logo">Platea</span></header>
+      <div class="success-body">
+        <div class="check"><svg width="64" height="64" viewBox="0 0 64 64"><path d="M12 36l14 16L52 10" fill="none" stroke="#12b886" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h1>Order Successfully Placed</h1>
+        <p class="thanks">Thank you for ordering with PLATEA. Your order has been received.</p>
+        <div class="order-sum">
+          <h2>Order Summary</h2>
+          <div class="r"><span>Order Number</span><span id="orderNo">#PLT-001</span></div>
+          <div class="r"><span>Order Total</span><span id="orderTotal">0.00</span></div>
+          <div class="r"><span>Payment Method</span><span id="orderPay">Cash</span></div>
+          <div class="r status"><span>Order Status</span><span class="pill">Confirmed</span></div>
+          <button class="back" id="backMenu">Back to Menu</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ============================================================
+   MENU DATA
+   Put your exported Figma photos in an /images folder next to
+   this file, named exactly as the "img" values below (.jpg).
+   If an image is missing, an emoji placeholder is shown instead.
+   ============================================================ */
+const PRICE = 99;
+const ITEMS = {
+  "combo-meal-1":   {name:"Combo Meal #1",   emoji:"🍽️", contain:true},
+  "sinigang":       {name:"Sinigang",        emoji:"🍲"},
+  "shrimp":         {name:"Shrimp",          emoji:"🍤"},
+  "ampalaya":       {name:"Ampalaya",        emoji:"🥬"},
+  "mango-shake":    {name:"Mango Shake",     emoji:"🥭"},
+  "spaghetti":      {name:"Spaghetti",       emoji:"🍝"},
+  "cinnamon":       {name:"Cinnamon",        emoji:"🥐", contain:true},
+  "champorado":     {name:"Champorado",      emoji:"🍫"},
+  "matcha-latte":   {name:"Matcha Latte",    emoji:"🍵", contain:true},
+  "fried-rice":     {name:"Fried Rice",      emoji:"🍚"},
+  "beef-stake":     {name:"Beef Stake",      emoji:"🥩"},
+  "biko":           {name:"Biko wd Peanuts", emoji:"🍘"},
+  "shawarma":       {name:"Shawarma",        emoji:"🌯"},
+  "burger":         {name:"Burger",          emoji:"🍔"},
+  "donuts":         {name:"Donuts",          emoji:"🍩"},
+  "combo-snacks":   {name:"Combo Snacks",    emoji:"🍟", contain:true},
+  "cookies":        {name:"Cookies",         emoji:"🍪", contain:true},
+  "waffle":         {name:"Waffle",          emoji:"🧇", contain:true},
+  "macaroons":      {name:"Macaroons",       emoji:"🍬", contain:true},
+  "graham-bar":     {name:"Graham Bar",      emoji:"🍫"},
+  "oreo-shake":     {name:"Oreo Shake",      emoji:"🥤", contain:true},
+  "halo-halo":      {name:"Halo-halo",       emoji:"🍧"},
+  "leche-flan":     {name:"Leche Flan",      emoji:"🍮"},
+  "orange-drink":   {name:"Orange Drink",    emoji:"🍊", contain:true},
+  "spanish-latte":  {name:"Spanish Latte",   emoji:"☕"},
+  "hot-americano":  {name:"Hot Black Americano", emoji:"☕"},
+  "iced-tea":       {name:"Iced Tea",        emoji:"🍹", contain:true},
+  "coca-cola":      {name:"Coca Cola",       emoji:"🥫", contain:true},
+  "calamansi-juice":{name:"Calamansi Juice", emoji:"🍋", contain:true},
+  "white-mocha":    {name:"White Mocha",     emoji:"🧋", contain:true}
+};
+const CATEGORIES = {
+  "All Items":["combo-meal-1","sinigang","shrimp","ampalaya","mango-shake","spaghetti","cinnamon","champorado","matcha-latte"],
+  "Meals":    ["combo-meal-1","sinigang","shrimp","ampalaya","fried-rice","spaghetti","beef-stake","champorado","biko"],
+  "Snacks":   ["shawarma","burger","donuts","combo-snacks","cookies","cinnamon","waffle","macaroons","biko"],
+  "Desserts": ["graham-bar","oreo-shake","halo-halo","leche-flan","champorado","biko","cinnamon","macaroons","cookies"],
+  "Drinks":   ["orange-drink","mango-shake","spanish-latte","hot-americano","iced-tea","coca-cola","calamansi-juice","white-mocha","matcha-latte"]
+};
+const PAYMENTS = ["Cash","GCash","PayMaya"];
+const ICON = {
+  Cash:`<svg width="34" height="26" viewBox="0 0 34 26"><rect x="1" y="5" width="28" height="17" rx="2" fill="#2fbf71"/><rect x="5" y="2" width="28" height="17" rx="2" fill="#1f9d5a"/><circle cx="19" cy="10.5" r="4" fill="#d9fbe6"/><text x="19" y="13" font-size="7" text-anchor="middle" fill="#1f9d5a" font-family="Arial" font-weight="700">$</text></svg>`,
+  wallet:`<svg width="26" height="26" viewBox="0 0 26 26"><rect x="2" y="5" width="22" height="17" rx="3" fill="#0aa561"/><rect x="2" y="3" width="14" height="4" rx="1.5" fill="#075a37"/><circle cx="19" cy="14" r="3" fill="#fff"/><circle cx="19" cy="14" r="1.2" fill="#0aa561"/></svg>`
+};
+const payIcon = n => n==="Cash" ? ICON.Cash : ICON.wallet;
+const money = n => n.toFixed(2);
+
+/* ---------- state ---------- */
+const state = { cat:"All Items", q:"", cart:{}, payment:"Cash", student:"", orderSeq:0 };
+
+/* ---------- navigation ---------- */
+const SCREENS = [["welcome","Welcome Page"],["login","Login Page"],["menu","Menu"],["cart","View the Cart"],["balance","Balance & Rewards"],["success","Order Success"]];
+const $ = id => document.getElementById(id);
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id===id));
+  document.querySelectorAll(".switcher button").forEach(b=>b.classList.toggle("on",b.dataset.id===id));
+  $("addedModal").classList.remove("on");
+  if(id==="cart") renderCart();
+  if(id==="balance") renderPay();
+  window.scrollTo({top:0});
+}
+$("switcher").innerHTML = SCREENS.map(([id,l])=>`<button data-id="${id}">${l}</button>`).join("");
+$("switcher").onclick = e => { if(e.target.dataset.id) show(e.target.dataset.id); };
+
+/* ---------- welcome & login ---------- */
+$("startBtn").onclick = () => show("login");
+$("continueBtn").onclick = () => { state.student = $("sid").value.trim(); show("menu"); };
+
+/* ---------- menu ---------- */
+function imgTag(id, cls=""){
+  const it = ITEMS[id];
+  return `<img class="${cls}" src="images/${id}.jpg" alt="${it.name}" onerror="this.remove?this.parentNode.textContent='${it.emoji}':0">`;
+}
+/* extra words people might search for (besides the item name and its category) */
+const KEYWORDS = {
+  "combo-meal-1":"fish rice pork squash lunch","sinigang":"pork soup tamarind","shrimp":"seafood prawn garlic",
+  "ampalaya":"bitter melon egg vegetable","mango-shake":"mango juice smoothie","spaghetti":"pasta noodles meat sauce",
+  "":"roll pastry bread","champorado":"chocolate rice porridge","matcha-latte":"matcha green tea coffee milk",
+  "fried-rice":"rice egg vegetable","beef-stake":"beef steak onion meat","biko":"rice cake sticky peanut kakanin",
+  "shawarma":"wrap beef meat","burger":"chicken sandwich bun","donuts":"donut doughnut sweet","combo-snacks":"burger fries",
+  "cookies":"cookie chocolate chip","waffle":"strawberry","macaroons":"macaron macarons","graham-bar":"ice cream sandwich oreo",
+  "oreo-shake":"cookies and cream milkshake","halo-halo":"ice shaved","leche-flan":"flan custard caramel",
+  "orange-drink":"juice orange","spanish-latte":"coffee iced","hot-americano":"coffee black hot",
+  "iced-tea":"tea lemon","coca-cola":"coke soda softdrink","calamansi-juice":"lime lemon juice","white-mocha":"coffee"
+};
+function categoriesOf(id){
+  return Object.keys(CATEGORIES).filter(c=>c!=="All Items" && CATEGORIES[c].includes(id));
+}
+function matches(id, q){
+  const hay = [ITEMS[id].name, KEYWORDS[id]||"", ...categoriesOf(id)].join(" ").toLowerCase();
+  // every typed word must appear somewhere (so "iced coffee" or "rice egg" work)
+  return q.split(/\s+/).filter(Boolean).every(w => hay.includes(w));
+}
+function renderTabs(){
+  const searching = !!state.q;
+  $("tabs").innerHTML = Object.keys(CATEGORIES).map(c=>`<button class="tab ${(!searching && c===state.cat)?"on":""}" data-c="${c}">${c}</button>`).join("");
+}
+function renderMenu(){
+  const q = state.q.toLowerCase().trim();
+  // while searching, look through the WHOLE menu (not just the open tab)
+  const ids = q ? Object.keys(ITEMS).filter(id => matches(id, q)) : CATEGORIES[state.cat];
+  $("sectionTitle").textContent = q ? `Search results for “${state.q}” (${ids.length})` : "Our Menu";
+  $("menuGrid").innerHTML = ids.length ? ids.map(id=>`
+    <div class="card">
+      <div class="imgbox">${imgTag(id, ITEMS[id].contain?"contain":"")}</div>
+      <div class="name">${ITEMS[id].name}</div>
+      <div class="price">P ${money(PRICE)}</div>
+      <button class="add" data-add="${id}">Add to Cart</button>
+    </div>`).join("") : `<div class="empty">No items match your search.</div>`;
+}
+const cartCount = () => Object.values(state.cart).reduce((a,b)=>a+b,0);
+const cartTotal = () => cartCount()*PRICE;
+const updateBadge = () => { $("cartCount").textContent = cartCount(); };
+
+function setSearch(value){
+  state.q = value.trim();
+  $("searchInput").value = value;
+  document.querySelector(".search").classList.toggle("has-text", !!value);
+  renderTabs(); renderMenu();
+}
+$("tabs").onclick = e => {
+  if(!e.target.dataset.c) return;
+  state.cat = e.target.dataset.c;
+  setSearch("");                       // choosing a tab clears the search
+};
+$("searchInput").oninput = e => setSearch(e.target.value);
+$("searchInput").onkeydown = e => {
+  if(e.key==="Enter") e.preventDefault();
+  if(e.key==="Escape") setSearch("");
+};
+$("searchGo").onclick = () => $("searchInput").focus();
+$("searchClear").onclick = () => { setSearch(""); $("searchInput").focus(); };
+$("menuGrid").onclick = e => {
+  const id = e.target.dataset.add; if(!id) return;
+  state.cart[id] = (state.cart[id]||0)+1;
+  updateBadge();
+  $("addedText").textContent = `${ITEMS[id].name} has been added to your cart.`;
+  $("addedModal").classList.add("on");
+};
+$("continueShopping").onclick = () => $("addedModal").classList.remove("on");
+$("addedModal").onclick = e => { if(e.target.id==="addedModal") $("addedModal").classList.remove("on"); };
+$("toCart").onclick = $("floatCart").onclick = () => show("cart");
+$("toBalance").onclick = () => show("balance");
+
+/* ---------- cart ---------- */
+function renderCart(){
+  const entries = Object.entries(state.cart).filter(([,q])=>q>0);
+  $("cartLines").innerHTML = entries.length ? entries.map(([id,q])=>`
+    <div class="line">
+      <div class="thumb">${imgTag(id)}</div>
+      <div class="info">
+        <div class="n">${ITEMS[id].name}</div>
+        <div class="q"><button data-dec="${id}">−</button>Quantity: ${q}<button data-inc="${id}">+</button></div>
+        <div class="p">P ${money(PRICE*q)}</div>
+      </div>
+    </div>`).join("")
+    : `<div class="empty-cart">Your cart is empty. <button id="emptyBack">Browse the menu</button></div>`;
+  $("subtotal").textContent = money(cartTotal());
+  $("fees").textContent = "00.00";
+  $("total").textContent = money(cartTotal());
+  $("cartPay").innerHTML = PAYMENTS.map(p=>`<option ${p===state.payment?"selected":""}>${p}</option>`).join("");
+  $("confirmBtn").disabled = !entries.length;
+  updateBadge();
+}
+$("cartLines").onclick = e => {
+  const d = e.target.dataset;
+  if(e.target.id==="emptyBack") return show("menu");
+  if(d.inc) state.cart[d.inc]++;
+  if(d.dec){ state.cart[d.dec]--; if(state.cart[d.dec]<=0) delete state.cart[d.dec]; }
+  renderCart();
+};
+$("cartPay").onchange = e => { state.payment = e.target.value; };
+$("confirmBtn").onclick = () => {
+  if(!cartCount()) return;
+  state.orderSeq++;
+  $("orderNo").textContent = "#PLT-" + String(state.orderSeq).padStart(3,"0");
+  $("orderTotal").textContent = money(cartTotal());
+  $("orderPay").textContent = state.payment;
+  show("success");
+};
+
+/* ---------- balance & rewards ---------- */
+function renderPay(){
+  $("payOptions").innerHTML = PAYMENTS.map(p=>`<button class="pay ${p===state.payment?"on":""}" data-p="${p}">${payIcon(p)}${p}</button>`).join("");
+}
+$("payOptions").onclick = e => { const b = e.target.closest(".pay"); if(b){ state.payment=b.dataset.p; renderPay(); } };
+$("balBack").onclick = () => show("menu");
+
+/* ---------- order success ---------- */
+$("backMenu").onclick = () => { state.cart = {}; updateBadge(); show("menu"); };
+
+/* ---------- init ---------- */
+renderTabs(); renderMenu(); updateBadge();
+show("welcome");
+</script>
+</body>
+</html>

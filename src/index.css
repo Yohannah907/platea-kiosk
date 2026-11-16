@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --platea-text: #0b5a14;
+    --platea-btn: #04502a;
+    --platea-btn-hover: #0b6b38;
+    --platea-btn-light: #b8f8b8;
+    --platea-line: #7edc86;
+    --platea-mint: #bdf2c8;
+    --platea-panel: #effff1;
+    --platea-chip: #cde8cf;
+    --platea-grey: #eeeeee;
+  }
+
+  body {
+    font-family: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+    color: var(--platea-text);
+    background-color: #ffffff;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--platea-btn);
+    outline-offset: 2px;
+  }
+}
+
+.font-platea-logo {
+  font-family: "Kaushan Script", cursive;
+}
+
+.font-platea-body {
+  font-family: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+}
+
+.grain-surface {
+  background-color: #eeeeee;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .12 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+.mint-grain-surface {
+  background-color: #bdf2c8;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .15  0 0 0 0 .45  0 0 0 0 .2  0 0 0 .06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
